@@ -30,6 +30,9 @@ def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
     coeffs = random.sample(range(2**32 - 1), sig_len * 2)
     return [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(count)]
 
+def approx_jaccard_score(a, b):
+    return sum(x == y for x, y in zip(a, b)) / len(a)
+
 hash_funcs = list(generate_hash_funcs(sig_len))
 
 sigs = []
@@ -48,7 +51,7 @@ for sig in sigs[-5:-1]:
 # access scores[x][y] at scores[x][y-x-1]
 scores = [
     [
-        sum(x == y for x, y in zip(a, b)) / len(a) for b in sigs[i+1:]
+        approx_jaccard_score(a, b) for b in sigs[i+1:]
     ] for i, a in enumerate(sigs)
 ]
 
