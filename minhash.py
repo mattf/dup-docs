@@ -54,11 +54,11 @@ def __main__():
             sigs.append([min(map(hash, shingles)) for hash in hash_funcs])
     print("signature time:", sig_time.interval)
 
-    for sig in sigs[0:4]:
-        print("[", " ".join(map(str,sig[1:5])), "...", " ".join(map(str,sig[-4:])), "]")
+    for sig in sigs[:4]:
+        print("[", " ".join(map(str,sig[:4])), "...", " ".join(map(str,sig[-4:])), "]")
     print("...")
-    for sig in sigs[-5:-1]:
-        print("[", " ".join(map(str,sig[1:5])), "...", " ".join(map(str,sig[-4:])), "]")
+    for sig in sigs[-4:]:
+        print("[", " ".join(map(str,sig[:4])), "...", " ".join(map(str,sig[-4:])), "]")
 
     # this builds a diagonal, upper-right matrix
     # locations along the main diagonal and below (lower-left) are invalid
