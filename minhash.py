@@ -23,6 +23,15 @@ def __main__():
     import json
     import os
 
+    import time
+    class Timer:
+        def __enter__(self):
+            self.start = time.process_time()
+            return self
+        def __exit__(self, *args):
+            self.end = time.process_time()
+            self.interval = self.end - self.start
+
     sig_len = 42
 
     seed = os.getenv("SEED")
@@ -38,10 +47,12 @@ def __main__():
 
     hash_funcs = list(generate_hash_funcs(sig_len))
 
-    sigs = []
-    for doc in docs:
-        shingles = list(generate_shingles(doc['text'].split(" ")))
-        sigs.append([min(map(hash, shingles)) for hash in hash_funcs])
+    with Timer() as sig_time:
+        sigs = []
+        for doc in docs:
+            shingles = list(generate_shingles(doc['text'].split(" ")))
+            sigs.append([min(map(hash, shingles)) for hash in hash_funcs])
+    print("signature time:", sig_time.interval)
 
     for sig in sigs[0:4]:
         print("[", " ".join(map(str,sig[1:5])), "...", " ".join(map(str,sig[-4:])), "]")
@@ -52,17 +63,21 @@ def __main__():
     # this builds a diagonal, upper-right matrix
     # locations along the main diagonal and below (lower-left) are invalid
     # access scores[x][y] at scores[x][y-x-1]
-    scores = [
-        [
-            approx_jaccard_score(a, b) for b in sigs[i+1:]
-        ] for i, a in enumerate(sigs)
-    ]
+    with Timer() as score_time:
+        scores = [
+            [
+                approx_jaccard_score(a, b) for b in sigs[i+1:]
+            ] for i, a in enumerate(sigs)
+        ]
+    print("score time:", score_time.interval)
 
-    bins = {0: 0, .1: 0, .2: 0, .3: 0, .4: 0, .5: 0, .6: 0, .7: 0, .8: 0, .9: 0, 1: 0}
-    for row in scores:
-        for score in row:
-            if score > 0:
-                bins[int(score * 10) / 10] += 1
+    with Timer() as bin_time:
+        bins = {0: 0, .1: 0, .2: 0, .3: 0, .4: 0, .5: 0, .6: 0, .7: 0, .8: 0, .9: 0, 1: 0}
+        for row in scores:
+            for score in row:
+                if score > 0:
+                    bins[int(score * 10) / 10] += 1
+    print("bin time:", bin_time.interval)
     print(bins)
 
     threshold = .7
