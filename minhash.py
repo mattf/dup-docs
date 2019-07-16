@@ -17,17 +17,13 @@ with open("docs.json") as fp:
 ids = [doc['id'] for doc in docs]
 print(len(ids), ":", " ".join(map(str,ids[1:5])), "...", " ".join(map(str,ids[-4:])))
 
-# TODO: test words len = 0 1 ... count count+1
-def generate_shingles(words, count=2):
-    # build pre-filled memory
-    memory=deque(words[:count-1])
-    # generate a string with count words
-    for w in words[count-1:]:
-        memory.append(w)
-        yield zlib.adler32(" ".join(memory).encode())
-        memory.popleft()
-    # TODO: fix hack for len(words) < count
-    yield zlib.adler32(" ".join(memory).encode())
+def generate_shingles(words, count=2, mapper=lambda x: zlib.adler32(x.encode)):
+    memory = deque(words[:count], maxlen=count)
+    yield mapper(" ".join(memory))
+    for word in words[count:]:
+        memory.append(word)
+        yield mapper(" ".join(memory))
+
 
 def func(a, b, c):
     return lambda x: (a * x + b) % c
