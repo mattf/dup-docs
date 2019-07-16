@@ -24,11 +24,13 @@ def generate_shingles(words, count=2, mapper=lambda x: zlib.adler32(x.encode)):
         memory.append(word)
         yield mapper(" ".join(memory))
 
+def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
+    def func(a, b, c):
+        return lambda x: (a * x + b) % c
+    coeffs = random.sample(range(2**32 - 1), sig_len * 2)
+    return [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(count)]
 
-def func(a, b, c):
-    return lambda x: (a * x + b) % c
-coeffs = random.sample(range(2**32 - 1), sig_len * 2)
-hash_funcs = [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(sig_len)]
+hash_funcs = list(generate_hash_funcs(sig_len))
 
 sigs = []
 for doc in docs:
