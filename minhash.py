@@ -33,11 +33,10 @@ def func(a, b, c):
 coeffs = random.sample(range(2**32 - 1), num_sigs * 2)
 hash_funcs = [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(num_sigs)]
 
-sigs = [
-    [
-        min(map(hash, generate_shingles(doc['text'].split(" ")))) for hash in hash_funcs
-    ] for doc in docs
-]
+sigs = []
+for doc in docs:
+    shingles = list(generate_shingles(doc['text'].split(" ")))
+    sigs.append([min(map(hash, shingles)) for hash in hash_funcs])
 
 for sig in sigs[0:4]:
     print("[", " ".join(map(str,sig[1:5])), "...", " ".join(map(str,sig[-4:])), "]")
