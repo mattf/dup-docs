@@ -4,11 +4,12 @@ import os
 import json
 import zlib
 
-num_sigs = 42
+sig_len = 42
 
 seed = os.getenv("SEED")
-print("using seed:", seed)
 random.seed(seed)
+print("using seed:", seed)
+print("signature length:", sig_len)
 
 with open("docs.json") as fp:
     docs = json.load(fp)
@@ -30,8 +31,8 @@ def generate_shingles(words, count=2):
 
 def func(a, b, c):
     return lambda x: (a * x + b) % c
-coeffs = random.sample(range(2**32 - 1), num_sigs * 2)
-hash_funcs = [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(num_sigs)]
+coeffs = random.sample(range(2**32 - 1), sig_len * 2)
+hash_funcs = [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(sig_len)]
 
 sigs = []
 for doc in docs:
