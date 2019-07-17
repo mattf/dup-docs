@@ -14,7 +14,7 @@ def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
     def func(a, b, c):
         return lambda x: (a * x + b) % c
     coeffs = random.sample(range(2**32 - 1), count * 2)
-    return [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(count)]
+    return [func(coeffs.pop(), coeffs.pop(), prime) for i in range(count)]
 
 def calculate_signature(shingles, hash_funcs):
     return np.array([min(map(hash, shingles)) for hash in hash_funcs])
