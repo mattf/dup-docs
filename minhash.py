@@ -28,8 +28,8 @@ def calculate_signature(shingles, hash_funcs):
 #  count = 0; for i in range(len(a)): if a[i] == b[i]: count += 1; count / len(a) ~= 27.6
 # it takes longer to construct a np.array when calculating the signatures, but that cost
 # increase is more than made up for in the scoring cost decrease
-def approx_jaccard_score(a, b):
-    return np.count_nonzero(a==b) / len(a)
+def approx_jaccard_score(a, b, axis=0):
+    return np.count_nonzero(a==b, axis) / len(a)
 
 
 def __main__():
@@ -61,10 +61,10 @@ def __main__():
     hash_funcs = list(generate_hash_funcs(sig_len))
 
     with Timer() as sig_time:
-        sigs = []
-        for doc in docs:
+        sigs = np.empty((len(docs), sig_len))
+        for i, doc in enumerate(docs):
             shingles = list(generate_shingles(doc['text'].split(" ")))
-            sigs.append(calculate_signature(shingles, hash_funcs))
+            sigs[i] = calculate_signature(shingles, hash_funcs)
 
     print("signature time:", sig_time.interval)
 
@@ -78,11 +78,7 @@ def __main__():
     # locations along the main diagonal and below (lower-left) are invalid
     # access scores[x][y] at scores[x][y-x-1]
     with Timer() as score_time:
-        scores = [
-            [
-                approx_jaccard_score(a, b) for b in sigs[i+1:]
-            ] for i, a in enumerate(sigs)
-        ]
+        scores = [approx_jaccard_score(a, sigs[i+1:], 1) for i, a in enumerate(sigs)]
     print("score time:", score_time.interval)
 
     with Timer() as bin_time:
