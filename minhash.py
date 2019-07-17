@@ -16,6 +16,9 @@ def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
     coeffs = random.sample(range(2**32 - 1), count * 2)
     return [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(count)]
 
+def calculate_signature(shingles, hash_funcs):
+    return np.array([min(map(hash, shingles)) for hash in hash_funcs])
+
 # this is...
 # a = b = range(100); c = d = np.array(range(100))
 # 1M iterations
@@ -26,7 +29,6 @@ def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
 # it takes longer to construct a np.array when calculating the signatures, but that cost
 # increase is more than made up for in the scoring cost decrease
 def approx_jaccard_score(a, b):
-    #return sum(x == y for x, y in zip(a, b)) / len(a)
     return np.count_nonzero(a==b) / len(a)
 
 
@@ -62,7 +64,8 @@ def __main__():
         sigs = []
         for doc in docs:
             shingles = list(generate_shingles(doc['text'].split(" ")))
-            sigs.append(np.array([min(map(hash, shingles)) for hash in hash_funcs]))
+            sigs.append(calculate_signature(shingles, hash_funcs))
+
     print("signature time:", sig_time.interval)
 
     for sig in sigs[:4]:
