@@ -82,20 +82,21 @@ def __main__():
     print("score time:", score_time.interval)
 
     with Timer() as bin_time:
-        bins = {0: 0, .1: 0, .2: 0, .3: 0, .4: 0, .5: 0, .6: 0, .7: 0, .8: 0, .9: 0, 1: 0}
+        # np.histogram uses last bin as max, to include 1.0 need a bin >1.0
+        bins = (0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 42)
+        hist = {0: 0, .1: 0, .2: 0, .3: 0, .4: 0, .5: 0, .6: 0, .7: 0, .8: 0, .9: 0, 1: 0}
         for row in scores:
-            for score in row:
-                if score > 0:
-                    bins[int(score * 10) / 10] += 1
+            counts, _ = np.histogram((row*10).astype(int)/10, bins)
+            for i, c in enumerate(counts):
+                hist[bins[i]] += c
     print("bin time:", bin_time.interval)
-    print(bins)
+    print(hist)
 
     threshold = .7
     for i in range(len(scores)):
         for j in range(i + 1, len(scores)):
             if threshold < scores[i][j-i-1] and scores[i][j-i-1] < 1:
                 print(ids[i], ids[j])
-
 
 
 if __name__ == "__main__":
