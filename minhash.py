@@ -1,4 +1,5 @@
 from collections import deque
+import numpy as np
 import random
 import zlib
 
@@ -16,10 +17,17 @@ def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
     return [func(coeffs.pop(), coeffs.pop(), 4294969733) for i in range(count)]
 
 # this is...
-# 0. ~35% faster than sum(a[i] == b[i] for i in range(len(a))) / len(a)
-# 1. ~5% faster than count = 0; for i in range(len(a)): if a[i] == b[i]: count += 1; count / len(a)
+# a = b = range(100); c = d = np.array(range(100))
+# 1M iterations
+#  np.count_nonzero(c==d) / len(c) ~= 2.6
+#  sum(x == y for x, y in zip(a, b)) / len(a) ~= 12.5
+#  sum(a[i] == b[i] for i in range(len(a))) / len(a) ~= 31.7
+#  count = 0; for i in range(len(a)): if a[i] == b[i]: count += 1; count / len(a) ~= 27.6
+# it takes longer to construct a np.array when calculating the signatures, but that cost
+# increase is more than made up for in the scoring cost decrease
 def approx_jaccard_score(a, b):
-    return sum(x == y for x, y in zip(a, b)) / len(a)
+    #return sum(x == y for x, y in zip(a, b)) / len(a)
+    return np.count_nonzero(a==b) / len(a)
 
 
 def __main__():
@@ -54,7 +62,7 @@ def __main__():
         sigs = []
         for doc in docs:
             shingles = list(generate_shingles(doc['text'].split(" ")))
-            sigs.append([min(map(hash, shingles)) for hash in hash_funcs])
+            sigs.append(np.array([min(map(hash, shingles)) for hash in hash_funcs]))
     print("signature time:", sig_time.interval)
 
     for sig in sigs[:4]:
