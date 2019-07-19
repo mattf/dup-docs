@@ -3,6 +3,8 @@ import numpy as np
 import random
 import zlib
 
+import json
+
 def generate_shingles(words, count=2, mapper=lambda x: zlib.adler32(x.encode())):
     memory = deque(words[:count], maxlen=count)
     yield mapper(" ".join(memory))
@@ -14,6 +16,8 @@ def generate_hash_funcs(count, max=2**32-1, prime=4294969733):
     def func(a, b, c):
         return lambda x: (a * x + b) % c
     coeffs = random.sample(range(2**32 - 1), count * 2)
+    with open("coeffs.json", 'w') as fp:
+        json.dump({"prime": prime, "coeffs": coeffs}, fp)
     return [func(coeffs.pop(), coeffs.pop(), prime) for i in range(count)]
 
 def calculate_signature(shingles, hash_funcs):
@@ -67,6 +71,9 @@ def __main__():
             sigs[i] = calculate_signature(shingles, hash_funcs)
 
     print("signature time:", sig_time.interval)
+
+    with open("signatures.json", 'w') as fp:
+        json.dump([{"id": id,"sig": sig.astype(int).tolist()} for id, sig in zip(ids, sigs)], fp)
 
     for sig in sigs[:4]:
         print("[", " ".join(map(str,sig[:4])), "...", " ".join(map(str,sig[-4:])), "]")
