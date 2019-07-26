@@ -2,7 +2,8 @@ with open("known_dups") as fp:
     known_dups = set()
     for line in fp.readlines():
         id0, id1 = map(int, line.strip().split(" "))
-        known_dups.add((min(id0, id1), max(id0, id1)))
+        if id0 != id1:
+            known_dups.add((min(id0, id1), max(id0, id1)))
 
 with open("discovered_dups") as fp:
     discovered_dups = set()
