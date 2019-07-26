@@ -1,3 +1,5 @@
+from gensim.utils import simple_preprocess
+
 from collections import deque
 import numpy as np
 import random
@@ -77,7 +79,7 @@ def __main__():
         with Timer() as sig_time:
             sigs = np.empty((len(docs), sig_len))
             for i, doc in enumerate(docs):
-                shingles = list(generate_shingles(doc['text'].split(" ")))
+                shingles = list(generate_shingles(simple_preprocess(doc['text'], min_len=0, max_len=4242)))
                 sigs[i] = calculate_signature(shingles, hash_funcs)
 
         print("signature time:", sig_time.interval)
