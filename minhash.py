@@ -111,11 +111,12 @@ def __main__():
     print("bin time:", bin_time.interval)
     print(hist)
 
-    threshold = .7
-    for i in range(len(scores)):
-        for j in range(i + 1, len(scores)):
-            if threshold < scores[i][j-i-1] and scores[i][j-i-1] < 1:
-                print(ids[i], ids[j], scores[i][j-i-1])
+    with open("discovered_dups", "w") as fp:
+        threshold = .42
+        for i in range(len(scores)):
+            for j in range(i + 1, len(scores)):
+                if threshold < scores[i][j-i-1] and scores[i][j-i-1] < 1:
+                    print(ids[i], ids[j], scores[i][j-i-1], file=fp)
 
 
 if __name__ == "__main__":
