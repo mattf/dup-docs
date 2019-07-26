@@ -113,7 +113,7 @@ def __main__():
     for i in range(len(scores)):
         for j in range(i + 1, len(scores)):
             if threshold < scores[i][j-i-1] and scores[i][j-i-1] < 1:
-                print(ids[i], ids[j])
+                print(ids[i], ids[j], scores[i][j-i-1])
 
 
 if __name__ == "__main__":
