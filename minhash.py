@@ -56,24 +56,34 @@ def __main__():
     print("using seed:", seed)
     print("signature length:", sig_len)
 
-    with open("docs.json") as fp:
-        docs = json.load(fp)
+    if os.path.isfile("signatures.json"):
+        print("loading known signatures")
+        with open("signatures.json", "r") as fp:
+            data = json.load(fp)
+            ids = []
+            sigs = np.empty((len(data), sig_len)) # TODO: sig_len may be different
+            for i, doc in enumerate(data):
+                ids.append(doc['id'])
+                sigs[i] = doc['sig']
+    else:
+        with open("docs.json") as fp:
+            docs = json.load(fp)
 
-    ids = [doc['id'] for doc in docs]
-    print(len(ids), ":", " ".join(map(str,ids[1:5])), "...", " ".join(map(str,ids[-4:])))
+        ids = [doc['id'] for doc in docs]
+        print(len(ids), ":", " ".join(map(str,ids[1:5])), "...", " ".join(map(str,ids[-4:])))
 
-    hash_funcs = list(generate_hash_funcs(sig_len))
+        hash_funcs = list(generate_hash_funcs(sig_len))
 
-    with Timer() as sig_time:
-        sigs = np.empty((len(docs), sig_len))
-        for i, doc in enumerate(docs):
-            shingles = list(generate_shingles(doc['text'].split(" ")))
-            sigs[i] = calculate_signature(shingles, hash_funcs)
+        with Timer() as sig_time:
+            sigs = np.empty((len(docs), sig_len))
+            for i, doc in enumerate(docs):
+                shingles = list(generate_shingles(doc['text'].split(" ")))
+                sigs[i] = calculate_signature(shingles, hash_funcs)
 
-    print("signature time:", sig_time.interval)
+        print("signature time:", sig_time.interval)
 
-    with open("signatures.json", 'w') as fp:
-        json.dump([{"id": id,"sig": sig.astype(int).tolist()} for id, sig in zip(ids, sigs)], fp)
+        with open("signatures.json", 'w') as fp:
+            json.dump([{"id": id,"sig": sig.astype(int).tolist()} for id, sig in zip(ids, sigs)], fp)
 
     for sig in sigs[:4]:
         print("[", " ".join(map(str,sig[:4])), "...", " ".join(map(str,sig[-4:])), "]")
