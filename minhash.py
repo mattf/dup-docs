@@ -1,5 +1,7 @@
 from gensim.utils import simple_preprocess
 
+from mfoops.timer import Timer
+
 from collections import deque
 import numpy as np
 import random
@@ -42,15 +44,6 @@ def __main__():
     import json
     import os
 
-    import time
-    class Timer:
-        def __enter__(self):
-            self.start = time.process_time()
-            return self
-        def __exit__(self, *args):
-            self.end = time.process_time()
-            self.interval = self.end - self.start
-
     sig_len = 42
 
     seed = os.getenv("SEED")
@@ -76,13 +69,11 @@ def __main__():
 
         hash_funcs = list(generate_hash_funcs(sig_len))
 
-        with Timer() as sig_time:
+        with Timer("signature time"):
             sigs = np.empty((len(docs), sig_len))
             for i, doc in enumerate(docs):
                 shingles = list(generate_shingles(simple_preprocess(doc['text'], min_len=0, max_len=4242)))
                 sigs[i] = calculate_signature(shingles, hash_funcs)
-
-        print("signature time:", sig_time.interval)
 
         with open("signatures.json", 'w') as fp:
             json.dump([{"id": id,"sig": sig.astype(int).tolist()} for id, sig in zip(ids, sigs)], fp)
@@ -96,11 +87,10 @@ def __main__():
     # this builds a diagonal, upper-right matrix
     # locations along the main diagonal and below (lower-left) are invalid
     # access scores[x][y] at scores[x][y-x-1]
-    with Timer() as score_time:
+    with Timer("score time"):
         scores = [approx_jaccard_score(a, sigs[i+1:], 1) for i, a in enumerate(sigs)]
-    print("score time:", score_time.interval)
 
-    with Timer() as bin_time:
+    with Timer("bin time"):
         # np.histogram uses last bin as max, to include 1.0 need a bin >1.0
         bins = (0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 42)
         hist = {0: 0, .1: 0, .2: 0, .3: 0, .4: 0, .5: 0, .6: 0, .7: 0, .8: 0, .9: 0, 1: 0}
@@ -108,7 +98,6 @@ def __main__():
             counts, _ = np.histogram((row*10).astype(int)/10, bins)
             for i, c in enumerate(counts):
                 hist[bins[i]] += c
-    print("bin time:", bin_time.interval)
     print(hist)
 
     with open("discovered_dups", "w") as fp:

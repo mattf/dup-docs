@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="minhash",
-    version="0.1.0",
+    version="0.1.1",
     author="Matthew Farrellee",
     author_email="matt@cs.wisc.edu",
     description="A playground minhash implementation",
@@ -10,7 +10,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/mattf/minhash",
     py_modules=['minhash'],
-    install_requires=['numpy', 'gensim'],
+    install_requires=['numpy', 'gensim', 'mfoops'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Affero General Public License v3",
