@@ -29,8 +29,10 @@ FP = len(known_nondups.intersection(discovered_dups))
 FN = len(known_dups.difference(discovered_dups))
 TP = len(known_dups.intersection(discovered_dups))
 
+
 def pct(n):
     return "%i%%" % (n * 100,)
+
 
 print("known dups:", POSITIVES)
 print("known non-dups:", NEGATIVES)

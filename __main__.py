@@ -5,17 +5,15 @@ from mfoops.timer import Timer
 import numpy as np
 
 import random
-import zlib
 
 import json
 
 from minhash import approx_jaccard_score, generate_hash_funcs, generate_shingles, calculate_signature
 
+import os
+
 
 def __main__():
-    import json
-    import os
-
     sig_len = 42
 
     seed = os.getenv("SEED")
@@ -28,7 +26,7 @@ def __main__():
         with open("signatures.json", "r") as fp:
             data = json.load(fp)
             ids = []
-            sigs = np.empty((len(data), sig_len)) # TODO: sig_len may be different
+            sigs = np.empty((len(data), sig_len))  # TODO: sig_len may be different
             for i, doc in enumerate(data):
                 ids.append(doc['id'])
                 sigs[i] = doc['sig']
@@ -37,7 +35,7 @@ def __main__():
             docs = json.load(fp)
 
         ids = [doc['id'] for doc in docs]
-        print(len(ids), ":", " ".join(map(str,ids[1:5])), "...", " ".join(map(str,ids[-4:])))
+        print(len(ids), ":", " ".join(map(str, ids[1:5])), "...", " ".join(map(str, ids[-4:])))
 
         hash_funcs = list(generate_hash_funcs(sig_len))
 
@@ -48,13 +46,13 @@ def __main__():
                 sigs[i] = calculate_signature(shingles, hash_funcs)
 
         with open("signatures.json", 'w') as fp:
-            json.dump([{"id": id,"sig": sig.astype(int).tolist()} for id, sig in zip(ids, sigs)], fp)
+            json.dump([{"id": id, "sig": sig.astype(int).tolist()} for id, sig in zip(ids, sigs)], fp)
 
     for sig in sigs[:4]:
-        print("[", " ".join(map(str,sig[:4])), "...", " ".join(map(str,sig[-4:])), "]")
+        print("[", " ".join(map(str, sig[:4])), "...", " ".join(map(str, sig[-4:])), "]")
     print("...")
     for sig in sigs[-4:]:
-        print("[", " ".join(map(str,sig[:4])), "...", " ".join(map(str,sig[-4:])), "]")
+        print("[", " ".join(map(str, sig[:4])), "...", " ".join(map(str, sig[-4:])), "]")
 
     # this builds a diagonal, upper-right matrix
     # locations along the main diagonal and below (lower-left) are invalid
